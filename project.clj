@@ -4,4 +4,6 @@
   				 [org.clojars.vshender/clojure-contrib "1.2.0-SNAPSHOT"]
   				 [inflections "0.7.0-SNAPSHOT"]
   				 [org.fife.ui/rsyntaxtextarea "2.0.3"]]
-  :main clj-gift-wrap.core)
+  :main clj-gift-wrap.core
+  :dev-dependencies [[lein-autodoc "0.9.0"]]
+  :autodoc 	{:name "Gift Wrappers" :page-title "RText"})

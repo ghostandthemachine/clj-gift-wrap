@@ -3,12 +3,13 @@
 		  [clojure.pprint]
 		  [inflections.core])
 	(:import 
+		(org.fife.ui.rtextarea RTextArea Macro)
 		(org.fife.ui.rsyntaxtextarea RSyntaxTextArea SyntaxConstants TokenMakerFactory))
 	(:require 
 		  [clojure.string :as s]
 		  [clojure.contrib.string :as cs]))
 
-(def alphabet ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"])
+(def alphabet ["x" "y" "z" "w" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v"])
 (def global-class-name (atom nil))
 
 (defn in? 
@@ -30,13 +31,33 @@
 
 (defn setter?
 	[fn-name]
-	(= "set" (str (s/join (take 3 (str fn-name))))))
+	(or 
+		(= "put" (str (s/join (take 3 (str fn-name)))))
+		(= "set" (str (s/join (take 3 (str fn-name)))))))
+
+(defn should-have-bang? 
+	[fn-name]
+	(or
+		(= "start" (str (s/join (take 5 (str fn-name)))))
+		(= "begin" (str (s/join (take 5 (str fn-name)))))
+		(= "end" (str (s/join (take 3 (str fn-name)))))
+		(= "add" (str (s/join (take 3 (str fn-name))))))
+	)
 
 (defn getter?
 	[m]
 	(and
 		(not (boolean? m))
 		(= "get" (str (s/join (take 3 (str (:name m))))))))
+
+
+(defn slice-count 
+	[fn-name]
+	(cond
+		(or
+			(= "put" (str (s/join (take 3 (str fn-name)))))
+			(= "add" (str (s/join (take 3 (str fn-name))))))
+		3))
 
 (defn get-fn-type 
 	[m]
@@ -51,6 +72,8 @@
 	  	(boolean? m)
 	  	(single-boolean-arg? (:parameter-types m)))
 	  :boolean
+	  (should-have-bang? (:name m))
+	  :should-have-bang
 	  :else 
 	  	:unknown))
 
@@ -99,6 +122,14 @@
 			:else
 				(str (hyphenize (str method-name)) "?"))))
 
+(defn format-bang
+	[method-name]
+	(str (hyphenize method-name) "!"))
+
+(defn format-slice
+	[method-name n]
+	(str (s/join (drop n method-name))))
+
 (defn format-unkown
 	[method-name]
 	(str (hyphenize method-name)))
@@ -115,6 +146,8 @@
 						(format-boolean m)
 	  				(= type :unkown)
 	  					(format-unkown (str (:name m)))
+	  				(= type :should-have-bang)
+	  					(format-bang (str (:name m)))
 	  				:else 
 	  					(format-unkown (str (:name m))))]
  		(str name "\n")))
@@ -171,21 +204,10 @@
 
 
 (defn -main [& args]
-	(build-wrapper (RSyntaxTextArea. )))
-
-
-
-
-
-
-
-
-
-
-
-(def m (:name (first (:members (reflect (RSyntaxTextArea. ))))))
-
-
+	(build-wrapper (Macro. ))
+	(build-wrapper (RTextArea. ))
+	(build-wrapper (RSyntaxTextArea. ))
+	)
 
 
 
